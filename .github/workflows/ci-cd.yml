@@ -1,0 +1,52 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - bigbank-api
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2  # Check out the code from the repository
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2  # Set up Docker Buildx for building multi-platform images
+
+    - name: Log in to registry
+      uses: docker/login-action@v2
+      with:
+        registry: https://bigbankcontainer.azurecr.io/
+        username: ${{ secrets.ACR_USERNAME }}  # Your Azure Container Registry username
+        password: ${{ secrets.ACR_PASSWORD }}  # Your Azure Container Registry password
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v3
+      with:
+        context: ./backend  # Use the backend directory as the build context
+        push: true  # Push the built image to the Azure Container Registry
+        tags: bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}  # Use the commit hash for versioning
+        file: ./backend/Dockerfile  # Specify the Dockerfile location inside the backend directory
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build  # Ensure this job runs after the build job
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}  # Output the URL of the deployed app
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'bigbank-api'  # The name of the Azure Web App to deploy to
+        slot-name: 'production'  # The deployment slot name (production)
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile }}  # Your Azure Publish Profile (added as secret)
+        images: 'bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}'  # Image to deploy
