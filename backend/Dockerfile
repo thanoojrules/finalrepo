@@ -1,22 +1,21 @@
-# Use the official Azure Functions Node.js runtime
-FROM mcr.microsoft.com/azure-functions/node:4
+# Use official Node.js image
+FROM node:18
 
-# Set the working directory inside the container
-WORKDIR /home/site/wwwroot
-
-# Copy package files first (to optimize caching)
-COPY package.json package-lock.json ./
+# Set working directory
+WORKDIR /app
 
 # Install dependencies
+COPY package*.json ./
 RUN npm install
 
-# Copy all other backend files
+# Copy the application code
 COPY . .
 
-# Set environment variables for Azure Functions
-ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
-    AzureFunctionsJobHost__Logging__ConsoleLevel=Information \
-    FUNCTIONS_WORKER_RUNTIME=node
+# Expose the necessary port
+EXPOSE 8080
 
-# Start Azure Functions runtime
-CMD ["func", "start", "--javascript"]
+# Set the environment variable for the database connection string
+ENV DATABASE_URL="postgres://thanooj:T#@nOOj@0899@bigbankdbserver.postgres.database.azure.com:5432/bigbankdb"
+
+# Command to run the application
+CMD ["npm", "start"]
