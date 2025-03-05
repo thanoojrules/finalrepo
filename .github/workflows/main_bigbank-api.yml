@@ -26,14 +26,13 @@ jobs:
         username: ${{ secrets.AzureAppService_ContainerUsername_74ecfcd424ac47a885c53a7ae099a714 }}
         password: ${{ secrets.AzureAppService_ContainerPassword_1f5d960369914f859da542eac6f4b702 }}
 
-    - name: Build and push container image to registry
-      uses: docker/build-push-action@v3
-      with:
-        context: .  # Ensure this points to the correct directory (root if Dockerfile is in root)
-        push: true
-        tags: bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}  # Use the commit hash for versioning
-        file: ./Dockerfile  # Specify Dockerfile location if it's not in the root directory
-
+   - name: Build and push container image to registry
+  uses: docker/build-push-action@v3
+  with:
+    context: ./backend  # Use the backend directory as the build context
+    push: true
+    tags: bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}  # Use the commit hash for versioning
+    file: ./backend/Dockerfile  # Specify the Dockerfile location inside the backend directory
   deploy:
     runs-on: ubuntu-latest
     needs: build
