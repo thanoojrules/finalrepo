@@ -6,6 +6,9 @@ on:
       - main  # Trigger workflow on push to the main branch
   workflow_dispatch:  # Allow manual trigger from GitHub UI
 
+permissions:
+  id-token: write  # Grant permission to generate an ID token for Azure login
+
 jobs:
   build:
     runs-on: 'ubuntu-latest'
