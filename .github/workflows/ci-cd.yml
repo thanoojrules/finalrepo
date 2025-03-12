@@ -19,10 +19,11 @@ jobs:
     - name: Log in to Azure CLI
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_USERNAME }}
-        client-secret: ${{ secrets.AZURE_PASSWORD }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Added Subscription ID
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Replace with the correct secret
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Replace with the correct secret
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Replace with the correct secret
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Replace with the correct secret
+        auth-type: "SERVICE_PRINCIPAL"  # Use service principal authentication
 
     - name: Log in to container registry
       uses: docker/login-action@v2
