@@ -1,4 +1,3 @@
-// ✅ Updated server.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -48,16 +47,25 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ Frontend Path Fix
-const frontendPath = path.join(__dirname, "frontend");
+// ✅ Serve Static Frontend Files from `public/`
+const frontendPath = path.join(__dirname, "public");
 app.use(express.static(frontendPath));
 
+// ✅ Serve Main Index Page
 app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// ✅ Serve Pages
-const pages = ["customer.html", "adminLogin.html", "adminDashboard.html"];
+// ✅ Serve Other Static Pages
+const pages = [
+  "customer.html",
+  "adminLogin.html",
+  "adminDashboard.html",
+  "dashboard.html",
+  "profile.html",
+  "signup.html",
+  "login.html",
+];
 pages.forEach((page) => {
   app.get(`/${page}`, (req, res) => {
     res.sendFile(path.join(frontendPath, page));
@@ -128,4 +136,4 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));

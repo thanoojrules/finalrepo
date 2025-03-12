@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Copy the frontend directory
-COPY frontend ./frontend  # Ensure the frontend folder is copied
+COPY frontend ./frontend  
 
 # Expose the necessary port
 EXPOSE 8080
