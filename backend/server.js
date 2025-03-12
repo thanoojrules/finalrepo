@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 });
 
 // ✅ Serve Static Frontend Files from `public/`
-const frontendPath = path.join(__dirname, "public");
+const frontendPath = path.join(__dirname,  "../frontend/public");
 app.use(express.static(frontendPath));
 
 // ✅ Serve Main Index Page
@@ -64,7 +64,7 @@ const pages = [
   "dashboard.html",
   "profile.html",
   "signup.html",
-  "login.html",
+  "login.html"
 ];
 pages.forEach((page) => {
   app.get(`/${page}`, (req, res) => {

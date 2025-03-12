@@ -27,9 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
-            const API_BASE_URL = "http://20.151.166.147:3000/api"; // ✅ Updated to VM IP
 
-            const response = await fetch(`${API_BASE_URL}/auth/login`, { 
+            const response = await fetch("api/auth/login", { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
