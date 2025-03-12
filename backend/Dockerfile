@@ -19,3 +19,5 @@ ENV DATABASE_URL="postgres://thanooj:T#@nOOj@0899@bigbankdbserver.postgres.datab
 
 # Command to run the application
 CMD ["npm", "start"]
+
+#....
