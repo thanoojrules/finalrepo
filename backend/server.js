@@ -36,7 +36,7 @@ app.use((req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, 'mysecretkey');
       req.userId = decoded.id;
       req.userEmail = decoded.email; // ✅ Capture User Email for Loan Notifications
       console.log("✅ Extracted User ID:", req.userId);

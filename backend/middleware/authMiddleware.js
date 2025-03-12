@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
     console.log("📌 Extracted Token:", token); // Log extracted token
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, 'mysecretkey');
         console.log("✅ Decoded Token:", decoded); // Log decoded token
         req.user = decoded;
         next();

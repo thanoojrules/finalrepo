@@ -1,28 +1,21 @@
-# Stage 1: Build backend
-FROM node:18 AS backend-build
+# Use official Node.js image as base
+FROM node:18-alpine
 
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy backend package.json and install dependencies
-COPY backend/package.json backend/
-RUN cd backend && npm install
+# Copy package.json and package-lock.json first (to leverage caching)
+COPY package*.json ./
 
-# Stage 2: Create final image for both frontend and backend
-FROM node:18
+# Install dependencies (both frontend and backend)
+RUN npm install
 
-WORKDIR /app
+# Copy the entire project (backend & frontend) into the container
+COPY . .
 
-# Copy backend code into the image
-COPY --from=backend-build /app/backend /app/backend
 
-# Copy frontend static files into backend's public folder
-COPY frontend /app/backend/public
-
-# Expose the necessary port
+# Expose backend port
 EXPOSE 3000
 
-# Set the environment variable for the database connection string
-ENV DATABASE_URL="postgres://thanooj:T#@nOOj@0899@bigbankdbserver.postgres.database.azure.com:5432/bigbankdb"
-
-# Command to run the application
+# Set the command to start the backend server
 CMD ["node", "backend/server.js"]

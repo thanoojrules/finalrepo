@@ -29,7 +29,7 @@ router.post("/signup", async (req, res) => {
         console.log("🔥 User Added Successfully: ", newUser.rows[0]);
 
         // ✅ Generate JWT Token
-        const token = jwt.sign({ id: newUser.rows[0].id, email: newUser.rows[0].email }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ id: newUser.rows[0].id, email: newUser.rows[0].email }, 'mysecretkey', { expiresIn: "7d" });
 
         res.json({ message: "✅ Account created successfully!", token, user: newUser.rows[0] });
     } catch (error) {
@@ -65,7 +65,8 @@ router.post("/login", async (req, res) => {
         }
 
         // ✅ Generate JWT Token
-        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        console.log("JWT_SECRET:", 'mysecretkey'); // Log to verify the secret
+        const token = jwt.sign({ id: user.id, email: user.email }, 'mysecretkey', { expiresIn: "1h" });
 
         console.log("✅ Login Successful:", email);
 
