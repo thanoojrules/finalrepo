@@ -1,11 +1,3 @@
-name: Build and deploy container app to Azure Web App - bigbank-api
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
 jobs:
   build:
     runs-on: 'ubuntu-latest'
@@ -19,12 +11,11 @@ jobs:
     - name: Log in to Azure CLI
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Replace with the correct secret
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Replace with the correct secret
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Replace with the correct secret
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Replace with the correct secret
-        auth-type: "SERVICE_PRINCIPAL"  # Use service principal authentication
-
+        client-id: ${{ secrets.AZURE_USERNAME }}
+        client-secret: ${{ secrets.AZURE_PASSWORD }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    
     - name: Log in to container registry
       uses: docker/login-action@v2
       with:
@@ -39,20 +30,3 @@ jobs:
         push: true
         tags: bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}
         file: ./backend/Dockerfile
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'bigbank-api'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile }}
-        images: 'bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}'
