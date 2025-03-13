@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bigbank-api
+  labels:
+    app: bigbank-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bigbank-api
+  template:
+    metadata:
+      labels:
+        app: bigbank-api
+    spec:
+      containers:
+      - name: bigbank-api
+        image: bigbankcontainer.azurecr.io/my-fullstack-app:latest
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+      - name: acr-credentials  # Using the secret created above
