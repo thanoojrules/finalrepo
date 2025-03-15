@@ -123,16 +123,24 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 // ✅ Get User Transfer History
+// ✅ Get User Transfer History (Fully Corrected)
 router.get("/history/:userId", authMiddleware, async (req, res) => {
     const { userId } = req.params;
 
     try {
+        const userEmailResult = await pool.query("SELECT email FROM users WHERE id = $1", [userId]);
+        if (userEmail.rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const userEmail = userEmail.rows[0].email;
+
         const transactions = await pool.query(
-            `SELECT t.id, t.transaction_type, t.amount, t.sender_email, t.recipient_email, t.created_at
-             FROM transactions t
-             WHERE t.user_id = $1 OR t.sender_email = (SELECT email FROM users WHERE id = $1)
-             ORDER BY t.created_at DESC`,
-            [userId]
+            `SELECT id, transaction_type, amount, sender_email, recipient_email, created_at
+             FROM transactions
+             WHERE sender_email = $1 OR recipient_email = $1
+             ORDER BY created_at DESC`,
+            [userEmail]
         );
 
         res.json(transactions.rows);
@@ -142,4 +150,55 @@ router.get("/history/:userId", authMiddleware, async (req, res) => {
     }
 });
 
+// ✅ Transfer from Savings to Account Balance
+router.post("/savings-to-balance", authMiddleware, async (req, res) => { 
+    try {
+        const { amount } = req.body;
+        const userId = req.user.id;
+
+        // Fetch user's balance & savings
+        const user = await pool.query("SELECT balance, savings FROM users WHERE id = $1", [userId]);
+
+        if (!user.rows.length || user.rows[0].savings < amount) {
+            return res.status(400).json({ error: "Insufficient savings balance." });
+        }
+
+        // Update balances
+        await pool.query("UPDATE users SET balance = balance + $1, savings = savings - $1 WHERE id = $2", [amount, userId]);
+
+        res.json({ message: "Transfer successful", newBalance: user.rows[0].balance + amount, newSavings: user.rows[0].savings - amount });
+
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// ✅ Transfer from Account Balance to Savings
+router.post("/balance-to-savings", authMiddleware, async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const userId = req.user.id;
+
+        // Get user's balance & savings
+        const user = await pool.query("SELECT balance, savings FROM users WHERE id = $1", [userId]);
+
+        if (!user.rows.length || user.rows[0].balance < amount) {
+            return res.status(400).json({ error: "Insufficient account balance." });
+        }
+
+        // Update balances
+        await pool.query("UPDATE users SET balance = balance - $1, savings = savings + $1 WHERE id = $2", [amount, userId]);
+
+        res.json({ message: "Transfer successful", newBalance: user.rows[0].balance - amount, newSavings: user.rows[0].savings + amount });
+
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
+
 module.exports = router;
+
