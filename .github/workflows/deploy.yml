@@ -16,13 +16,13 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Log in to Azure CLI
+    - name: Log in to Azure CLI (Managed Identity)
       run: |
-        az login --username ${{ secrets.AZURE_USERNAME }} --password ${{ secrets.AZURE_PASSWORD }}
+        az login --identity
 
     - name: Log in to Azure Container Registry (ACR)
       run: |
-        az acr login --name bigbankcontainer --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
+        az acr login --name bigbankcontainer
 
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v2
@@ -39,9 +39,9 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v2
 
-    - name: Log in to Azure CLI
+    - name: Log in to Azure CLI (Managed Identity)
       run: |
-        az login --username ${{ secrets.AZURE_USERNAME }} --password ${{ secrets.AZURE_PASSWORD }}
+        az login --identity
 
     - name: Set AKS Context
       run: |
