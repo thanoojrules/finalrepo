@@ -130,7 +130,7 @@ cron.schedule("0 0 1 * *", async () => {
   }
 });
 
-// ✅ 404 Error Handling
+// ✅ 404 Error Handling.
 app.use((req, res) => {
   res.status(404).json({ error: "❌ Route not found!" });
 });
