@@ -1,23 +1,58 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bigbank-api
-  labels:
-    app: bigbank-api
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: bigbank-api
-  template:
-    metadata:
-      labels:
-        app: bigbank-api
-    spec:
-      containers:
-      - name: bigbank-api
-        image: bigbankcontainer.azurecr.io/my-fullstack-app:latest
-        ports:
-        - containerPort: 3000
-      imagePullSecrets:
-      - name: acr-secret  # Using .the secret created above
+name: Build and Deploy to AKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Azure CLI (Managed Identity)
+        run: |
+          az login --identity
+
+      - name: Log in to Azure Container Registry (ACR)
+        run: |
+          az acr login --name bigbankcontainer
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            bigbankcontainer.azurecr.io/my-fullstack-app:latest
+            bigbankcontainer.azurecr.io/my-fullstack-app:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Log in to Azure CLI (Managed Identity)
+        run: |
+          az login --identity
+
+      - name: Set AKS Context
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AZURE_AKS_NAME }}
+
+      - name: Deploy to AKS
+        run: |
+          kubectl apply -f kubernetes/
+
+      - name: Restart Deployment (Force Pull Latest Image)
+        run: |
+          kubectl rollout restart deployment bigbank-api
