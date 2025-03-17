@@ -22,5 +22,5 @@ jobs:
           zip -r app.zip .  # Package the app
           az functionapp deployment source config-zip \
             --resource-group BigBankResourceGroup \
-            --name BigBankFunctionApp \
+            --name BigBank-RG \
             --src app.zip
