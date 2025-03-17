@@ -3,7 +3,7 @@ name: Deploy to Azure Function App
 on:
   push:
     branches:
-      - main  # Deploy when code is pushed to main
+      - main
 
 jobs:
   build-deploy:
@@ -13,9 +13,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Azure Login
+      - name: Login to Azure using Managed Identity
         run: |
-          az login -u ${{ secrets.AZURE_USERNAME }} -p ${{ secrets.AZURE_PASSWORD }}
+          az login --identity
 
       - name: Deploy to Azure Function App
         run: |
