@@ -15,7 +15,7 @@ jobs:
 
       - name: Login to Azure using Managed Identity
         run: |
-          az login --identity
+          az login --identity --username 80f96dcc-62a7-447a-8292-27f009c48007
 
       - name: Deploy to Azure Function App
         run: |
