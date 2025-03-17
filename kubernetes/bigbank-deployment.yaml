@@ -20,4 +20,4 @@ spec:
         ports:
         - containerPort: 3000
       imagePullSecrets:
-      - name: acr-credentials  # Using the secret created above
+      - name: acr-secret  # Using .the secret created above
