@@ -13,9 +13,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Login to Azure using Managed Identity
+      - name: Login to Azure using Device Authentication
         run: |
-          az login --identity --username 80f96dcc-62a7-447a-8292-27f009c48007
+          az login --use-device-code
 
       - name: Deploy to Azure Function App
         run: |
