@@ -1,56 +1,26 @@
-name: Build and Deploy to AKS
+name: Deploy to Azure Function App
 
 on:
   push:
     branches:
-      - main
+      - main  # Deploy when code is pushed to main
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Azure Login
+        run: |
+          az login -u ${{ secrets.AZURE_USERNAME }} -p ${{ secrets.AZURE_PASSWORD }}
 
-    - name: Log in to Azure CLI (Managed Identity)
-      run: |
-        az login --identity
-
-    - name: Log in to Azure Container Registry (ACR)
-      run: |
-        az acr login --name bigbankcontainer
-
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: bigbankcontainer.azurecr.io/my-fullstack-app:latest
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
-
-    - name: Log in to Azure CLI (Managed Identity)
-      run: |
-        az login --identity
-
-    - name: Set AKS Context
-      run: |
-        az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AZURE_AKS_NAME }}
-
-    - name: Deploy to AKS
-      run: |
-        kubectl apply -f kubernetes/
-
-    - name: Restart Deployment (Force Pull Latest Image)
-      run: |
-        kubectl rollout restart deployment bigbank-api
+      - name: Deploy to Azure Function App
+        run: |
+          zip -r app.zip .  # Package the app
+          az functionapp deployment source config-zip \
+            --resource-group BigBankResourceGroup \
+            --name BigBankFunctionApp \
+            --src app.zip
