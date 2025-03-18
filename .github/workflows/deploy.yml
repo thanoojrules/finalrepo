@@ -1,60 +1,55 @@
-name: Build and Deploy to AKS
+name: Build and Deploy BigBank API to Azure Web App
 
 on:
   push:
     branches:
       - main
-
+  workflow_dispatch:
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Azure using Device Authentication
-        run: |
-          echo "🚀 Please log in using the code shown below."
-          az login --use-device-code
+    - name: Log in to Azure Container Registry (ACR)
+      uses: docker/login-action@v2
+      with:
+        registry: bigbankcontainer.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Log in to Azure Container Registry (ACR)
-        run: |
-          az acr login --name bigbankcontainer
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: |
-            bigbankcontainer.azurecr.io/my-fullstack-app:latest
-            bigbankcontainer.azurecr.io/my-fullstack-app:${{ github.sha }}
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v3
+      with:
+        context: .   # 🔥 Now Dockerfile is in root
+        push: true
+        platforms: linux/amd64
+        tags: bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}
+        file: ./Dockerfile  # 🔥 Updated path
 
   deploy:
-    needs: build
     runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'bigbank-api'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: 'bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}'
 
-      - name: Log in to Azure using Device Authentication
-        run: |
-          echo "🚀 Please log in using the code shown below."
-          az login --use-device-code
-
-      - name: Set AKS Context
-        run: |
-          az aks get-credentials --resource-group "BigBank-RG" --name "bigbank-aks-cluster"
-
-      - name: Deploy to AKS
-        run: |
-          kubectl apply -f kubernetes/
-
-      - name: Restart Deployment (Force Pull Latest Image)
-        run: |
-          kubectl rollout restart deployment bigbank-api
+    - name: Confirm Deployment
+      run: |
+        echo "✅ Deployment successful! App is live at: https://bigbank-api.azurewebsites.net"
