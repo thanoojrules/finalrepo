@@ -47,19 +47,6 @@ jobs:
           echo "🚀 Please log in using the code shown below."
           az login --use-device-code
 
-      - name: 🔍 Debug: Print Active Azure Subscription
-        run: |
-          echo "🔍 Checking active Azure subscription..."
-          az account show --output table
-
-      - name: Ensure Correct Azure Subscription
-        run: |
-          az account set --subscription "4e30a47b-c9e5-4c60-9849-6aa867d82748"
-
-      - name: 🔍 Debug: Verify Subscription After Setting
-        run: |
-          az account show --output table
-
       - name: Set AKS Context
         run: |
           az aks get-credentials --resource-group "BigBank-RG" --name "bigbank-aks-cluster"
