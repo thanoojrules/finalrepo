@@ -10,47 +10,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-    - name: Log in to Azure CLI (Device Authentication)
-      run: |
-        az login --use-device-code
+      - name: Log in to Azure using Device Authentication
+        run: |
+          echo "🚀 Please log in using the code shown below."
+          az login --use-device-code
 
-    - name: Log in to Azure Container Registry (ACR)
-      run: |
-        az acr login --name bigbankcontainer
+      - name: Log in to Azure Container Registry (ACR)
+        run: |
+          az acr login --name bigbankcontainer
 
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: bigbankcontainer.azurecr.io/my-fullstack-app:latest
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            bigbankcontainer.azurecr.io/my-fullstack-app:latest
+            bigbankcontainer.azurecr.io/my-fullstack-app:${{ github.sha }}
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Log in to Azure CLI (Device Authentication)
-      run: |
-        az login --use-device-code
+      - name: Log in to Azure using Device Authentication
+        run: |
+          echo "🚀 Please log in using the code shown below."
+          az login --use-device-code
 
-    - name: Set AKS Context
-      run: |
-        az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AZURE_AKS_NAME }}
+      - name: Set AKS Context
+        run: |
+          az aks get-credentials --resource-group "BigBank-RG" --name "bigbank-aks-cluster"
 
-    - name: Deploy to AKS
-      run: |
-        kubectl apply -f kubernetes/
+      - name: Deploy to AKS
+        run: |
+          kubectl apply -f kubernetes/
 
-    - name: Restart Deployment (Force Pull Latest Image)
-      run: |
-        kubectl rollout restart deployment bigbank-api
+      - name: Restart Deployment (Force Pull Latest Image)
+        run: |
+          kubectl rollout restart deployment bigbank-api
