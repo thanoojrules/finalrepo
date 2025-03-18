@@ -31,8 +31,8 @@ jobs:
           context: .
           push: true
           tags: |
-            bigbankcontainer.azurecr.io/my-fullstack-app:latest
-            bigbankcontainer.azurecr.io/my-fullstack-app:${{ github.sha }}
+            bigbankcontainer.azurecr.io/bigbank-backend:latest
+            bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}
 
   deploy:
     needs: build
