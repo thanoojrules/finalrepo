@@ -21,6 +21,15 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// ✅ Fix CORS - Allow Frontend Access
+const corsOptions = {
+  origin: "https://green-bay-0d49ad40f.6.azurestaticapps.net", // ✅ Restrict to frontend
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // ✅ Allow auth headers
+  allowedHeaders: "Content-Type,Authorization"
+};
+app.use(cors(corsOptions));
+
 // ✅ Session Middleware for Admin.
 app.use(
   session({
