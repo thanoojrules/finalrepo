@@ -26,4 +26,4 @@ jobs:
           app_location: "/"  # Set this to your root directory
           api_location: ""  # Leave empty if not using an API
           output_location: ""  # No build step required
-          app_build_command: ""  # Explicitly disable build step
+          app_build_command: ""  # Expl....icitly disable build step
