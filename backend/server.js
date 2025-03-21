@@ -135,5 +135,7 @@ app.use((req, res) => {
   res.status(404).json({ error: "❌ Route not found!" });
 });
 
-const PORT = process.env.WEBSITES_PORT || process.env.PORT || 8081;
-app.listen(PORT, "0.0.0.0", () => console.log(`✅ Server running on port ${PORT}`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

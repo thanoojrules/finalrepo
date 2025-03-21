@@ -15,7 +15,7 @@ COPY . .
 
 
 # Expose backend port
-EXPOSE 3000
+EXPOSE 80
 
 # Set the command to start the backend server
 CMD ["node", "backend/server.js"]

@@ -1,60 +1,39 @@
-name: Build and Deploy to AKS
+name: Deploy to Azure Static Web Apps
 
 on:
   push:
     branches:
-      - main
+      - main  # Triggers deployment when code is pushed to main branch
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main  # Runs checks on PRs before merging
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+    
+      - name: 🔹 Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Log in to Azure using Device Authentication
-        run: |
-          echo "🚀 Please log in using the code shown below."
-          az login --use-device-code
-
-      - name: Log in to Azure Container Registry (ACR)
-        run: |
-          az acr login --name bigbankcontainer
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v2
+      - name: 🔹 Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          context: .
-          push: true
-          tags: |
-            bigbankcontainer.azurecr.io/bigbank-backend:latest
-            bigbankcontainer.azurecr.io/bigbank-backend:${{ github.sha }}
+          node-version: 18
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
+      - name: 🔹 Install Dependencies
+        run: npm install  # If using React/Vue/Angular, adjust accordingly
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: 🔹 Build the Project
+        run: npm run build  # Adjust based on framework (React, Vue, Angular)
 
-      - name: Log in to Azure using Device Authentication
-        run: |
-          echo "🚀 Please log in using the code shown below."
-          az login --use-device-code
-
-      - name: Set AKS Context
-        run: |
-          az aks get-credentials --resource-group "BigBank-RG" --name "bigbank-aks-cluster"
-
-      - name: Deploy to AKS
-        run: |
-          kubectl apply -f kubernetes/
-
-      - name: Restart Deployment (Force Pull Latest Image)
-        run: |
-          kubectl rollout restart deployment bigbank-api
+      - name: 🔹 Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}  # Needed for GitHub integrations
+          action: "upload"
+          app_location: "/"  # Change this if your frontend is inside a subfolder like `frontend/`
+          api_location: ""  # Leave blank if not using an API
+          output_location: "build"  # Change based on your frontend framework
