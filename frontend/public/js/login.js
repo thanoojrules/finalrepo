@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", function () {
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent form refresh
 
-        // Get input values safely
         const emailField = document.getElementById("email");
         const passwordField = document.getElementById("password");
 
@@ -27,21 +26,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         try {
-
-            const response = await fetch("api/auth/login", { 
+            const response = await fetch("https://your-backend-url.com/api/auth/login", { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
 
-            const data = await response.json();
+            // ✅ Handle empty response
+            const text = await response.text();
+            console.log("🔍 Raw API Response:", text);
+            
+            const data = text ? JSON.parse(text) : null; // Prevents JSON parse error
 
-            if (response.ok) {
+            if (response.ok && data) {
                 localStorage.setItem("token", data.token);
                 alert("✅ Login successful!");
                 window.location.href = "dashboard.html"; // Redirect to dashboard
             } else {
-                alert(`🚨 Login failed: ${data.error}`);
+                alert(`🚨 Login failed: ${data ? data.error : "Unknown error"}`);
             }
         } catch (error) {
             console.error("❌ Login request failed:", error);
