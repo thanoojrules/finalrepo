@@ -14,23 +14,28 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const creditCardRoutes = require("./routes/creditCardRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const loanRoutes = require("./routes/loanRoutes"); // ✅ Added Loan Routes
+const loanRoutes = require("./routes/loanRoutes"); // ✅ Loan Routes
 
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use(cors());
 
 // ✅ Fix CORS - Allow Frontend Access
-const corsOptions = {
-  origin: "https://green-bay-0d49ad40f.6.azurestaticapps.net", // ✅ Restrict to frontend
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // ✅ Allow auth headers
-  allowedHeaders: "Content-Type,Authorization"
-};
-app.use(cors(corsOptions));
+const allowedOrigins = [
+  "https://bigbank-frontend.redwave-8bcf09a2.eastus.azurecontainerapps.io",
+  "http://localhost:3000"
+];
 
-// ✅ Session Middleware for Admin.
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
+
+// ✅ Session Middleware for Admin
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "bigbanksecret",
@@ -45,9 +50,9 @@ app.use((req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (token) {
     try {
-      const decoded = jwt.verify(token, 'mysecretkey');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); // ✅ Use environment variable
       req.userId = decoded.id;
-      req.userEmail = decoded.email; // ✅ Capture User Email for Loan Notifications
+      req.userEmail = decoded.email;
       console.log("✅ Extracted User ID:", req.userId);
     } catch (err) {
       console.warn("⚠️ Invalid or expired token.");
@@ -56,8 +61,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ Serve Static Frontend Files from `public/`
-const frontendPath = path.join(__dirname,  "../frontend/public");
+// ✅ Serve Static Frontend Files
+const frontendPath = path.join(__dirname, "../frontend/public");
 app.use(express.static(frontendPath));
 
 // ✅ Serve Main Index Page
@@ -89,7 +94,12 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/credit", creditCardRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/loans", loanRoutes); // ✅ Loan API Routes
+app.use("/api/loans", loanRoutes);
+
+// ✅ Health Check Route
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "OK", message: "Backend is running" });
+});
 
 // ✅ Connect to PostgreSQL
 pool
@@ -139,12 +149,13 @@ cron.schedule("0 0 1 * *", async () => {
   }
 });
 
-// ✅ 404 Error Handling..
+// ✅ 404 Error Handling
 app.use((req, res) => {
   res.status(404).json({ error: "❌ Route not found!" });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// ✅ Start Server
+const PORT = process.env.PORT || 80;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
 });

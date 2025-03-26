@@ -3,9 +3,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-
+    const API_URL = "https://bigbank-backend.redwave-8bcf09a2.eastus.azurecontainerapps.io";
     try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
+        const response = await fetch(`${API_URL}/api/user/details`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })

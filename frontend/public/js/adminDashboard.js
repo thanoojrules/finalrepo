@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function () {
+    const API_URL = "https://bigbank-backend.redwave-8bcf09a2.eastus.azurecontainerapps.io"; // Azure Backend URL
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ✅ Fetch Users
     async function fetchAdminData() {
         try {
-            const usersResponse = await fetch('/api/admin/users', {
+            const usersResponse = await fetch(`${API_URL}/api/user/details`, {
                 method: 'GET',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ✅ Fetch Loan Requests
     async function fetchLoanRequests() {
         try {
-            const response = await fetch('/api/admin/loan-subscriptions', {
+            const response = await fetch(`${API_URL}/api/user/details`, {
                 method: 'GET',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -90,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         try {
-            const response = await fetch(`/api/loans/approve`, {
+            const response = await fetch(`${API_URL}/api/loans/approve`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!confirm(`⚠️ Are you sure you want to reject the loan request for ${userEmail}?`)) return;
 
         try {
-            const response = await fetch(`/api/loans/reject`, {
+            const response = await fetch(`${API_URL}/api/loans/reject`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ✅ Send Notification
     async function sendNotification(userEmail, message) {
         try {
-            await fetch('/api/notifications', {
+            await fetch(`${API_URL}/api/user/details`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,7 +165,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ✅ Change Role
     window.changeRole = async function (userId, role) {
         try {
-            const response = await fetch(`/api/admin/users/${userId}/role`, {
+            const response = await fetch(`${API_URL}/api/admin/users/${userId}/role`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -189,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!confirm("⚠️ Are you sure you want to delete this user?")) return;
 
         try {
-            const response = await fetch(`/api/admin/users/${userId}`, {
+            const response = await fetch(`${API_URL}/api/admin/users/${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -208,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ✅ View User Loans
     window.viewUserLoans = async function (userEmail) {
         try {
-            const response = await fetch(`/api/admin/user-loans?email=${userEmail}`, {
+            const response = await fetch(`${API_URL}/api/admin/user-loans?email=${userEmail}`, {
                 method: 'GET',
                 headers: { 'Authorization': 'Bearer ' + token }
             });

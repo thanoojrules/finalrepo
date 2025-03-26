@@ -1,4 +1,7 @@
+
+const API_URL = "https://bigbank-backend.redwave-8bcf09a2.eastus.azurecontainerapps.io";
 document.addEventListener("DOMContentLoaded", async function () {
+
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -8,20 +11,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     console.log("🔐 Token Retrieved:", token);
 
-    // ✅ Fetch User Details
     async function fetchUserDetails() {
         try {
-            const response = await fetch("/api/user/details", {
+            const response = await fetch(`${API_URL}/api/user/details`, {  // ✅ Fixed API URL
                 headers: { "Authorization": `Bearer ${token}` }
             });
-
+    
             if (!response.ok) {
                 throw new Error("Failed to fetch user details.");
             }
-
+    
             const data = await response.json();
             console.log("✅ User Details:", data);
-
             document.getElementById("debitBalance").textContent = `$${parseFloat(data.balance).toFixed(2)}`;
             document.getElementById("scenePoints").textContent = data.scene_points;
         } catch (error) {
@@ -32,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // ✅ Fetch Transaction History & Load Calendar
     async function fetchTransactionHistory() {
         try {
-            const response = await fetch("/api/transactions", {
+            const response = await fetch(`${API_URL}/api/user/details`, {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -71,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         try {
-            const response = await fetch("/api/loans/subscribe", {
+            const response = await fetch(`${API_URL}/api/user/details`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -111,7 +112,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // ✅ Download Credit Card Statement
     document.getElementById("downloadStatementBtn")?.addEventListener("click", async function () {
         try {
-            const response = await fetch("/api/credit/statement", {
+            const response = await fetch(`${API_URL}/api/user/details`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
 

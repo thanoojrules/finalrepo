@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const API_URL = "https://bigbank-backend.redwave-8bcf09a2.eastus.azurecontainerapps.io"; // Azure Backend URL
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -11,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ✅ Fetch User Profile
     async function fetchUserProfile() {
         try {
-            const response = await fetch("/api/user/profile", {
+            const response = await fetch(`${API_URL}/api/user/profile`, { // ✅ FIXED
                 headers: { "Authorization": `Bearer ${token}` }
             });
             const data = await response.json();
@@ -26,8 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // ✅ Transfer to Balance
     async function transferToBalance() {
-        const token = localStorage.getItem("token");
         const amount = parseFloat(document.getElementById("transferToBalanceAmount").value);
     
         if (isNaN(amount) || amount <= 0) {
@@ -36,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         try {
-            const response = await fetch("/api/transfer/savings-to-balance", {
+            const response = await fetch(`${API_URL}/api/transfer/savings-to-balance`, { // ✅ FIXED
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -51,26 +52,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert(data.error || "Transfer failed.");
             } else {
                 alert("Transfer successful!");
-                fetchUserProfile(); // Refresh balance & savings
+                fetchUserProfile();
             }
         } catch (error) {
             console.error("❌ Transfer Error:", error.message);
         }
     }
     
-    // Attach event listener
-    document.getElementById("transferToBalanceBtn").addEventListener("click", transferToBalance);
-    async function transferToSavings() {
-        const token = localStorage.getItem("token");
+    document.getElementById("transferToBalanceBtn")?.addEventListener("click", transferToBalance);
+     
+     // ✅ Transfer Account Balance to Savings (NEW FUNCTION)
+     async function transferToSavings() {
         const amount = parseFloat(document.getElementById("transferToSavingsAmount").value);
-    
+
         if (isNaN(amount) || amount <= 0) {
-            alert("Please enter a valid amount.");
+            alert("❌ Please enter a valid amount.");
             return;
         }
-    
+
         try {
-            const response = await fetch("/api/transfer/balance-to-savings", {
+            const response = await fetch(`${API_URL}/api/transfer/balance-to-savings`, { 
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,75 +79,67 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify({ amount })
             });
-    
+
             const data = await response.json();
-    
+
             if (!response.ok) {
-                alert(data.error || "Transfer failed.");
+                alert(data.error || "❌ Transfer failed.");
             } else {
-                alert("Transfer successful!");
-                fetchUserProfile(); // Refresh balance & savings
+                alert("✅ Transfer successful!");
+                fetchUserProfile();
             }
         } catch (error) {
             console.error("❌ Transfer Error:", error.message);
         }
     }
+    document.getElementById("transferToSavingsBtn")?.addEventListener("click", transferToSavings); 
     
-    // Attach event listener
-    document.getElementById("transferToSavingsBtn").addEventListener("click", transferToSavings);
     // ✅ Fetch Transaction History
-async function fetchTransactionHistory() {
-    const token = localStorage.getItem("token");
+    async function fetchTransactionHistory() {
+        try {
+            const response = await fetch(`${API_URL}/api/transactions`, { // ✅ FIXED
+                headers: { "Authorization": `Bearer ${token}` }
+            });
 
-    try {
-        const response = await fetch("/api/transactions", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+            if (!response.ok) throw new Error("Failed to fetch transactions.");
 
-        if (!response.ok) throw new Error("Failed to fetch transactions.");
+            const transactions = await response.json();
+            console.log("✅ Transaction Data Fetched:", transactions);
 
-        const transactions = await response.json();
-        console.log("✅ Transaction Data Fetched:", transactions);
+            const transactionList = document.getElementById("transactionList");
+            transactionList.innerHTML = '';
 
-        const transactionList = document.getElementById("transactionList");
-        transactionList.innerHTML = '';
-
-        if (transactions.length === 0) {
-            transactionList.innerHTML = '<li>No transactions available.</li>';
-            return;
-        }
-
-        transactions.forEach(txn => {
-            const recipient = txn.recipient_email ? txn.recipient_email : "Unknown";
-            const sender = txn.sender_email ? txn.sender_email : "Unknown";
-
-            let transactionDetail = '';
-            if (txn.transaction_type.toLowerCase() === 'transfer') {
-                transactionDetail = `Sent to: ${recipient}`;
-            } else if (txn.transaction_type.toLowerCase() === 'received') {
-                transactionDetail = `Received from: ${sender}`;
-            } else {
-                transactionDetail = 'Transaction details unavailable';
+            if (transactions.length === 0) {
+                transactionList.innerHTML = '<li>No transactions available.</li>';
+                return;
             }
 
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `
-                <strong>${txn.transaction_type.toUpperCase()}:</strong> ${transactionDetail}
-                <span class="money">$${txn.amount}</span>
-                <small>(${new Date(txn.created_at).toLocaleString()})</small>
-            `;
-            transactionList.appendChild(listItem);
-        });
+            transactions.forEach(txn => {
+                const recipient = txn.recipient_email || "Unknown";
+                const sender = txn.sender_email || "Unknown";
 
-    } catch (error) {
-        console.error("❌ Transaction Fetch Error:", error.message);
+                let transactionDetail = txn.transaction_type.toLowerCase() === 'transfer'
+                    ? `Sent to: ${recipient}`
+                    : `Received from: ${sender}`;
+
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `
+                    <strong>${txn.transaction_type.toUpperCase()}:</strong> ${transactionDetail}
+                    <span class="money">$${txn.amount}</span>
+                    <small>(${new Date(txn.created_at).toLocaleString()})</small>
+                `;
+                transactionList.appendChild(listItem);
+            });
+
+        } catch (error) {
+            console.error("❌ Transaction Fetch Error:", error.message);
+        }
     }
-}
 
     // ✅ Fetch Notifications
     async function fetchNotifications() {
         try {
-            const response = await fetch("/api/notifications", {
+            const response = await fetch(`${API_URL}/api/notifications`, { // ✅ FIXED
                 headers: { "Authorization": `Bearer ${token}` }
             });
 
@@ -164,7 +157,7 @@ async function fetchTransactionHistory() {
         }
     }
 
-    // ✅ Transfer Money Function
+    // ✅ Transfer Money
     async function transferMoney() {
         const recipientEmail = document.getElementById("recipientEmail").value.trim();
         const amount = parseFloat(document.getElementById("transferAmount").value);
@@ -174,42 +167,44 @@ async function fetchTransactionHistory() {
             return;
         }
 
-        const response = await fetch("/api/transfer", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ recipientEmail, amount })
-        });
+        try {
+            const response = await fetch(`${API_URL}/api/transfer`, { // ✅ FIXED
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ recipientEmail, amount })
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (!response.ok) {
-            alert(data.error || "Transfer failed.");
-        } else {
-            alert("Transfer successful!");
-            fetchUserProfile();
-            fetchTransactionHistory();
-            fetchNotifications();
+            if (!response.ok) {
+                alert(data.error || "Transfer failed.");
+            } else {
+                alert("Transfer successful!");
+                fetchUserProfile();
+                fetchTransactionHistory();
+                fetchNotifications();
+            }
+        } catch (error) {
+            console.error("❌ Transfer Error:", error);
         }
     }
 
-    document.getElementById("transferBtn").addEventListener("click", transferMoney);
+    document.getElementById("transferBtn")?.addEventListener("click", transferMoney);
 
     // ✅ Logout Button Toggles Notification Display
-    const logoutBtn = document.getElementById("logoutBtn");
-    const notificationList = document.getElementById("notificationList");
-    
-    logoutBtn.addEventListener("click", () => {
-        notificationList.classList.toggle("show");
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
     });
 
     // ✅ Initial Fetch Calls
     fetchUserProfile();
     fetchTransactionHistory();
     fetchNotifications();
-});  
+});
 
 function generateRandomTransactionID() {
     return Math.floor(1000000000 + Math.random() * 9000000000); // Generates a 10-digit random number
@@ -252,7 +247,7 @@ async function fetchTransactionGraph() {
     const token = localStorage.getItem("token");
     
     try {
-        const response = await fetch("/api/transactions", {
+        const response = await fetch("${API_URL}/api/transactions", {
             headers: { "Authorization": `Bearer ${token}` }
         });
 

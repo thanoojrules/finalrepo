@@ -1,56 +1,70 @@
-/* ✅ admin.css */
-
-/* General Styling */
+/* ✅ Admin Panel - Enhanced Styling */
 body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
     color: #333;
     text-align: center;
 }
 
-/* 🔐 Admin Login Container */
+/* 🔐 Admin Login Box */
 .admin-login-container {
     max-width: 400px;
-    margin: 80px auto;
+    margin: 100px auto;
     padding: 30px;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.admin-login-container:hover {
+    transform: scale(1.02);
 }
 
 h1 {
     color: #007bff;
+    font-weight: bold;
     margin-bottom: 20px;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
 }
 
 input[type="email"],
 input[type="password"] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
     font-size: 16px;
+    text-align: center;
+    transition: border-color 0.3s ease-in-out;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #007bff;
+    outline: none;
 }
 
 button {
-    padding: 10px 20px;
-    background-color: #007bff;
+    padding: 12px 15px;
+    background: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
+    transition: background 0.3s ease-in-out;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background: #0056b3;
 }
 
 .back-btn {
@@ -65,4 +79,61 @@ button:hover {
 #loginError {
     margin-top: 10px;
     font-size: 14px;
+    color: red;
+}
+
+/* 🔷 Admin Dashboard */
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: left;
+}
+
+/* 🔷 Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.action-buttons button {
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.action-buttons .delete {
+    background: #dc3545;
+    color: white;
+}
+
+.action-buttons .delete:hover {
+    background: #b02a37;
+}
+
+.action-buttons .restrict {
+    background: #ffc107;
+    color: black;
+}
+
+.action-buttons .restrict:hover {
+    background: #e0a800;
+}
+
+/* 🔷 Responsive */
+@media (max-width: 768px) {
+    .admin-dashboard {
+        width: 90%;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
 }
