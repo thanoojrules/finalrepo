@@ -35,7 +35,7 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }}/Dockerfile-Frontend
-          _dockerfilePathKey_: _dockerfilePath_
+          _dockerfilePathKey_: Dockerfile-Frontend
           registryUrl: bigbankacr123.azurecr.io
           registryUsername: ${{ secrets.BIGBANKFRONTEND_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.BIGBANKFRONTEND_REGISTRY_PASSWORD }}
